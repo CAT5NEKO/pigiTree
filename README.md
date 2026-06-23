@@ -1,21 +1,27 @@
 # pigiTree
-Generate a directory tree up to the specified depth.
 
-![temp](https://github.com/user-attachments/assets/c3ddc0dd-cea7-4b2c-b328-4fcde52b99ec)
+ﾋﾟｷﾞﾓﾝｺﾞ ʕ◔ϖ◔ʔ — A cross-platform `tree` command clone with depth control for Windows.
 
-When using Tree on Windows, it was not possible to create a directory tree to a specified depth by default (like `tree -L 2
-`), so I implemented a similar function in Go.
+On Windows, the built-in `tree` command doesn't support `-L` (max depth), so this tool fills that.
 
 ## Installation
 
 ```shell
-go build -o pigiTree
+go build -o pigiTree.exe .
 ```
+
+Then place `pigiTree.exe` in a directory listed in your `PATH` (e.g. `%USERPROFILE%\go\bin`).
+
 ## Usage
 
 ```shell
-pigiTree <depth> [path]
-# example
-pigiTree 2 "/Pigimon/go"
+pigiTree [options] [path]
 
+Options:
+  -L int    max display depth of the directory tree (default -1 = unlimit)
+  -a        list all files, including hidden files
+  -d        list directories only
+  -f        print full path prefix for each file
+  -noreport omit summary report
+  -h        show this help ʕ◔ϖ◔ʔ
 ```
