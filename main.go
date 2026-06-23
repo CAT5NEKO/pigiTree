@@ -1,42 +1,64 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
+
 	"pigiTree/tree"
-	"pigiTree/utils"
-	"strconv"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		utils.PrintHelp()
-		return
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
+	maxDepth := flag.Int("L", -1, "max display depth of the directory tree")
+	all := flag.Bool("a", false, "list all files, including hidden")
+	dirsOnly := flag.Bool("d", false, "list directories only")
+	fullPath := flag.Bool("f", false, "print full path prefix for each file")
+	noReport := flag.Bool("noreport", false, "omit summary report")
+	help := flag.Bool("h", false, "show this help")
+
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "ﾋﾟｷﾞﾓﾝｺﾞ ʕ◔ϖ◔ʔ\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "pigiTree - a directory tree generator\n")
+		fmt.Fprintf(flag.CommandLine.Output(), "Usage: %s [options] [path]\n\n", os.Args[0])
+		fmt.Fprintf(flag.CommandLine.Output(), "Options:\n")
+		flag.PrintDefaults()
 	}
 
-	if os.Args[1] == "-h" {
-		utils.PrintHelp()
-		return
+	flag.Parse()
+
+	if *help {
+		flag.Usage()
+		return nil
 	}
 
-	depth, err := strconv.Atoi(os.Args[1])
+	root := "."
+	if flag.NArg() > 0 {
+		root = flag.Arg(0)
+	}
+
+	info, err := os.Stat(root)
 	if err != nil {
-		utils.PrintError("Please provide a valid number for depth.")
-		return
+		return fmt.Errorf("%s does not exist", root)
+	}
+	if !info.IsDir() {
+		return fmt.Errorf("%s is not a directory", root)
 	}
 
-	dir := "."
-	if len(os.Args) > 2 {
-		dir = os.Args[2]
+	opts := tree.Options{
+		Writer:   os.Stdout,
+		MaxDepth: *maxDepth,
+		All:      *all,
+		DirsOnly: *dirsOnly,
+		FullPath: *fullPath,
+		NoReport: *noReport,
 	}
 
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		utils.PrintError(fmt.Sprintf("Directory %s does not exist", dir))
-		return
-	}
-
-	err = tree.PrintTree(dir, depth)
-	if err != nil {
-		utils.PrintError(fmt.Sprintf("Error generating tree: %v", err))
-	}
+	return tree.PrintTree(root, opts)
 }
